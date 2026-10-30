@@ -109,7 +109,7 @@ class Settings(BaseSettings):
     )
 
     proximity_cooldown_seconds: NonNegativeFloat = Field(
-        default=1.0,
+        default=0.1,
         description="Minimum interval between proximity triggers in seconds",
     )
 

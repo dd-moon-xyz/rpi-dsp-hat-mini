@@ -67,7 +67,6 @@ class ProximityNextTrigger:
         is_confirmed_near = self.near_samples >= self.confirmation_samples
         should_trigger = (
             is_confirmed_near
-            and not self.was_near
             and now - self.last_triggered >= self.cooldown_seconds
         )
 
@@ -168,11 +167,13 @@ def main() -> None:
         while running:
             for name in buttons.pressed():
                 if name == "X":
-                    blink_change_led(screen)
+                    if proximity is None or not proximity.was_near:
+                        blink_change_led(screen)
                     current_animation = animation_deck.previous_animation()
                     console.log(f"showing animation: {current_animation.path}")
                 if name == "Y":
-                    blink_change_led(screen)
+                    if proximity is None or not proximity.was_near:
+                        blink_change_led(screen)
                     current_animation = animation_deck.next_animation()
                     console.log(f"showing animation: {current_animation.path}")
                 if name == "A":
@@ -193,11 +194,10 @@ def main() -> None:
                     console.log(f"backlight increased to {backlight:.2f}")
 
             if proximity is not None and proximity.next_requested():
-                blink_change_led(screen)
                 current_animation = animation_deck.next_animation()
                 console.log(f"showing animation: {current_animation.path}")
 
-            screen.set_led(0, 0, 0)
+            screen.set_led(float(proximity is not None and proximity.was_near), 0, 0)
             frame_started = time.monotonic()
             frame = current_animation.next_frame()
             screen.show(frame)
