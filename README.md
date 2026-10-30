@@ -24,6 +24,23 @@ Enable SPI for the display and I2C for the Qw/ST sensor on the Raspberry Pi:
 ```bash
 sudo raspi-config nonint do_spi 0
 sudo raspi-config nonint do_i2c 0
+```
+
+Before rebooting, add this line under `[all]` in `/boot/firmware/config.txt`:
+
+```ini
+dtoverlay=spi0-2cs,no_miso
+```
+
+Display HAT Mini uses GPIO 9 for the display data/command signal instead of SPI
+MISO. This overlay frees GPIO 9 while retaining SPI0 chip select 1 for the
+display. Without it, newer kernels can reject display initialization with
+`pin gpio9 already requested by 3f204000.spi` and `ValueError: (22, 'Invalid argument')`.
+PM2 repeatedly restarting the failed app can make the backlight flash.
+
+Reboot to apply the configuration:
+
+```bash
 sudo reboot
 ```
 
